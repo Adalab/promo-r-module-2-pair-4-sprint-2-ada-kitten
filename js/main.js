@@ -13,13 +13,14 @@ const inputRace = document.querySelector('.js-input-race');
 const linkNewFormElememt = document.querySelector('.js-button-new-form');
 const labelMesageError = document.querySelector('.js-label-error');
 const input_search_desc = document.querySelector('.js_in_search_desc');
+const inputSearchRace = document.querySelector('.js_in_search_race');
 
 //Objetos con cada gatito
 const kittenData_1 = {
   image: 'https://ychef.files.bbci.co.uk/976x549/p07ryyyj.jpg',
   name: 'Anastacio',
   desc: 'Ruiseño, juguetón, le guta estar tranquilo y que nadie le moleste. Es una maravilla acariciarle!',
-  race: 'British Shorthair',
+  race: 'Siamés',
 };
 const kittenData_2 = {
   image:
@@ -59,9 +60,10 @@ function renderKitten(kittenData) {
 
 function renderKittenList(kittenDataList) {
   listElement.innerHTML = '';
+  kittenDataList.map((kitten)=>listElement.innerHTML += renderKitten(kitten));/* 
   for (const kittenItem of kittenDataList) {
     listElement.innerHTML += renderKitten(kittenItem);
-  }
+  } */
 }
 
 //Mostrar/ocultar el formulario
@@ -121,14 +123,17 @@ function cancelNewKitten(event) {
 //Filtrar por descripción
 function filterKitten(event) {
   event.preventDefault();
-  const descrSearchText = input_search_desc.value;
+  const descrSearchText = input_search_desc.value.toLowerCase();
+  const raceSearchText = inputSearchRace.value.toLowerCase();
   listElement.innerHTML = '';
-  for (const kittenItem of kittenDataList) {
-    if (kittenItem.desc.includes(descrSearchText)) {
-      listElement.innerHTML += renderKitten(kittenItem);
-    }
-  }
+  const kittenDataFilter = kittenDataList
+  .filter((kitten) => kitten.desc.toLowerCase().includes(descrSearchText))
+  .filter((kitten) => kitten.race.toLowerCase().includes(raceSearchText));
+  renderKittenList(kittenDataFilter);
+
 }
+
+
 
 function resetDataList() {
   inputDesc.value = '';
