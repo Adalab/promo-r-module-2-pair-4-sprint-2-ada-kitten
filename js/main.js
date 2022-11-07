@@ -15,6 +15,10 @@ const labelMesageError = document.querySelector('.js-label-error');
 const input_search_desc = document.querySelector('.js_in_search_desc');
 const inputSearchRace = document.querySelector('.js_in_search_race');
 
+/*Elementos API*/
+const GITHUB_USER = 'martcastrillo';
+const SERVER_URL = `https://dev.adalab.es/api/kittens/${GITHUB_USER}`;
+
 //Objetos con cada gatito
 const kittenData_1 = {
   image: 'https://ychef.files.bbci.co.uk/976x549/p07ryyyj.jpg',
@@ -37,9 +41,28 @@ const kittenData_3 = {
   race: 'British Shorthair',
 };
 
-const kittenDataList = [kittenData_1, kittenData_2, kittenData_3];
+// const kittenDataList = [kittenData_1, kittenData_2, kittenData_3];
+let kittenDataList = [];
 
 //Funciones
+
+//coger la lista de gatitos del servidor e imprimirla por pantalla
+//se usa GET y no POST porque solo vamos a OBTENER datos del servidor
+//POST es para mandar y recibir datos
+//dependerá de la documentación de la API
+function getKittensFromApi() {
+  fetch(SERVER_URL, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data.results);
+      kittenDataList = data.results;
+      renderKittenList(kittenDataList);
+    });
+}
+
 function renderKitten(kittenData) {
   const kitten = `<li class="card">
     <article>
@@ -60,7 +83,9 @@ function renderKitten(kittenData) {
 
 function renderKittenList(kittenDataList) {
   listElement.innerHTML = '';
-  kittenDataList.map((kitten)=>listElement.innerHTML += renderKitten(kitten));/* 
+  kittenDataList.map(
+    (kitten) => (listElement.innerHTML += renderKitten(kitten))
+  ); /* 
   for (const kittenItem of kittenDataList) {
     listElement.innerHTML += renderKitten(kittenItem);
   } */
@@ -127,13 +152,10 @@ function filterKitten(event) {
   const raceSearchText = inputSearchRace.value.toLowerCase();
   listElement.innerHTML = '';
   const kittenDataFilter = kittenDataList
-  .filter((kitten) => kitten.desc.toLowerCase().includes(descrSearchText))
-  .filter((kitten) => kitten.race.toLowerCase().includes(raceSearchText));
+    .filter((kitten) => kitten.desc.toLowerCase().includes(descrSearchText))
+    .filter((kitten) => kitten.race.toLowerCase().includes(raceSearchText));
   renderKittenList(kittenDataFilter);
-
 }
-
-
 
 function resetDataList() {
   inputDesc.value = '';
@@ -143,7 +165,7 @@ function resetDataList() {
 }
 
 //Mostrar el litado de gatitos en ell HTML
-renderKittenList(kittenDataList);
+getKittensFromApi();
 
 //Eventos
 linkNewFormElememt.addEventListener('click', handleClickNewCatForm);
