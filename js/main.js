@@ -44,6 +44,9 @@ const kittenData_3 = {
 // const kittenDataList = [kittenData_1, kittenData_2, kittenData_3];
 let kittenDataList = [];
 
+//Guardar en local storage
+const kittenListStored = JSON.parse(localStorage.getItem('kittensList'));
+
 //Funciones
 
 //coger la lista de gatitos del servidor e imprimirla por pantalla
@@ -51,6 +54,16 @@ let kittenDataList = [];
 //POST es para mandar y recibir datos
 //dependerá de la documentación de la API
 function getKittensFromApi() {
+
+if (kittenListStored) {
+  //si existe el listado de gatitos en el local storage
+  // vuelve a pintar el listado de gatitos
+  //...
+  //completa el código...
+  renderKittenList(kittenListStored);
+} else {
+  //sino existe el listado de gatitos en el local storage
+  //haz la petición al servidor
   fetch(SERVER_URL, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
@@ -58,9 +71,14 @@ function getKittensFromApi() {
     .then((response) => response.json())
     .then((data) => {
       console.log(data.results);
-      kittenDataList = data.results;
-      renderKittenList(kittenDataList);
+      localStorage.setItem("kittensList", JSON.stringify(data.results));
+      renderKittenList(data.results);
+    })
+    .catch((error) => {
+      console.error(error);
     });
+}
+  
 }
 
 function renderKitten(kittenData) {
@@ -128,11 +146,35 @@ function addNewKitten(event) {
   } else {
     if (valueDesc !== '' && valuePhoto !== '' && valueName !== '') {
       //que añada el gatito
-      kittenDataList.push(newKittenDataObject);
-      //que lo pinte
-      renderKittenList(kittenDataList);
-      resetDataList();
-      labelMesageError.innerHTML = 'Mola! Un nuevo gatito en Adalab!';
+   
+        fetch(SERVER_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(newKittenDataObject),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            //Completa y/o modifica el código:
+            //Agrega el nuevo gatito al listado
+            if (kittenListStored){
+              kittenListStored.push(newKittenDataObject);
+            }
+        
+            //Guarda el listado actualizado en el local stoarge
+            localStorage.setItem("kittensList", JSON.stringify(newKittenDataObject));
+            //Visualiza nuevamente el listado de gatitos
+            renderKittenList(newKittenDataObject);
+    
+            //Limpia los valores de cada input
+            resetDataList();
+            labelMesageError.innerHTML = 'Mola! Un nuevo gatito en Adalab!';
+          } else {
+            labelMesageError.innerHTML = 'No se ha podido añadir un nuevo gatito';
+          }
+         });
+  
+   
     }
   }
 }
@@ -166,6 +208,9 @@ function resetDataList() {
 
 //Mostrar el litado de gatitos en ell HTML
 getKittensFromApi();
+
+
+
 
 //Eventos
 linkNewFormElememt.addEventListener('click', handleClickNewCatForm);
