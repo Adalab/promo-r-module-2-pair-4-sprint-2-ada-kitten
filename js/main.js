@@ -54,55 +54,97 @@ const kittenListStored = JSON.parse(localStorage.getItem('kittensList'));
 //POST es para mandar y recibir datos
 //dependerá de la documentación de la API
 function getKittensFromApi() {
-
-if (kittenListStored) {
-  //si existe el listado de gatitos en el local storage
-  // vuelve a pintar el listado de gatitos
-  //...
-  //completa el código...
-  renderKittenList(kittenListStored);
-} else {
-  //sino existe el listado de gatitos en el local storage
-  //haz la petición al servidor
-  fetch(SERVER_URL, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log(data.results);
-      localStorage.setItem("kittensList", JSON.stringify(data.results));
-      renderKittenList(data.results);
+  if (kittenListStored) {
+    //si existe el listado de gatitos en el local storage
+    // vuelve a pintar el listado de gatitos
+    //...
+    //completa el código...
+    renderKittenList(kittenListStored);
+  } else {
+    //sino existe el listado de gatitos en el local storage
+    //haz la petición al servidor
+    fetch(SERVER_URL, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
     })
-    .catch((error) => {
-      console.error(error);
-    });
-}
-  
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data.results);
+        localStorage.setItem('kittensList', JSON.stringify(data.results));
+        renderKittenList(data.results);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
 }
 
 function renderKitten(kittenData) {
-  const kitten = `<li class="card">
-    <article>
-      <img
-        class="card_img"
-        src=${kittenData.image}
-        alt="gatito"
-      />
-      <h3 class="card_title">${kittenData.name}</h3>
-      <h3 class="card_race">${kittenData.race}</h3>
-      <p class="card_description">
-      ${kittenData.desc}
-      </p>
-    </article>
-    </li>`;
-  return kitten;
+  const liElement = document.createElement('li'); //este es el ovulo <li></li>
+  liElement.classList.add('card'); //añade la clase card a la etiqueta <li>
+  //crear el article
+  const articleElement = document.createElement('article'); //<article></article>
+  //crear el img
+  const imgElement = document.createElement('img'); //<img>
+  imgElement.classList.add('card_img'); //añade la clase card_img a la etiqueta <img>
+  //crear h3 del title
+  const h3TitleElement = document.createElement('h3'); //<h3></h3>
+  h3TitleElement.classList.add('card_title'); //añade la clase card_title a la etiqueta <h3>
+  //crear h3 de race
+  const h3RaceElement = document.createElement('h3'); //<h3></h3>
+  h3RaceElement.classList.add('card_race'); //añade la clase card_race a la etiqueta <h3>
+  //crear p
+  const pElement = document.createElement('p'); //<p></p>
+  pElement.classList.add('card_description'); //añade la clase card_description a la etiqueta <p>
+
+  //le añadimos el contenido a cada etiqueta
+  //rellenamos los atributos de la imagen
+  imgElement.setAttribute('src', kittenData.image); //escribe la url de la imagen en el atributo src
+  imgElement.setAttribute('alt', 'Imagen gatito'); //escribe el texto alternativo de la imagen en el atributo alt
+  //crear el node element con el name del kitten
+  const kittenDataName = document.createTextNode(kittenData.name);
+  //rellenamos el texto del h3 de clase card_title
+  h3TitleElement.appendChild(kittenDataName);
+  //crear el node element con la race del kitten
+  const kittenDataRace = document.createTextNode(kittenData.race);
+  //rellenamos el texto del h3 de clase card_race
+  h3TitleElement.appendChild(kittenDataRace);
+  //crear el node element con la desc del kitten
+  const kittenDataDesc = document.createTextNode(kittenData.desc);
+  //rellenamos el párrafo
+  pElement.appendChild(kittenDataDesc);
+  //rellenamos el article con los 4 elementos que lleva dentro
+  articleElement.appendChild(imgElement);
+  articleElement.appendChild(h3TitleElement);
+  articleElement.appendChild(h3RaceElement);
+  articleElement.appendChild(pElement);
+  //rellenamos el li con el article
+  liElement.appendChild(articleElement);
+  return liElement;
 }
+//ANTIGUA función renderKitten
+// function renderKitten(kittenData) {
+//   const kitten = `<li class="card">
+//     <article>
+//       <img
+//         class="card_img"
+//         src=${kittenData.image}
+//         alt="gatito"
+//       />
+//       <h3 class="card_title">${kittenData.name}</h3>
+//       <h3 class="card_race">${kittenData.race}</h3>
+//       <p class="card_description">
+//       ${kittenData.desc}
+//       </p>
+//     </article>
+//     </li>`;
+//   return kitten;
+// }
 
 function renderKittenList(kittenDataList) {
   listElement.innerHTML = '';
-  kittenDataList.map(
-    (kitten) => (listElement.innerHTML += renderKitten(kitten))
+  kittenDataList.map((kitten) =>
+    listElement.appendChild(renderKitten(kitten))
   ); /* 
   for (const kittenItem of kittenDataList) {
     listElement.innerHTML += renderKitten(kittenItem);
@@ -146,10 +188,10 @@ function addNewKitten(event) {
   } else {
     if (valueDesc !== '' && valuePhoto !== '' && valueName !== '') {
       //que añada el gatito
-   
-        fetch(SERVER_URL, {
+
+      fetch(SERVER_URL, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newKittenDataObject),
       })
         .then((response) => response.json())
@@ -157,24 +199,26 @@ function addNewKitten(event) {
           if (data.success) {
             //Completa y/o modifica el código:
             //Agrega el nuevo gatito al listado
-            if (kittenListStored){
+            if (kittenListStored) {
               kittenListStored.push(newKittenDataObject);
             }
-        
+
             //Guarda el listado actualizado en el local stoarge
-            localStorage.setItem("kittensList", JSON.stringify(newKittenDataObject));
+            localStorage.setItem(
+              'kittensList',
+              JSON.stringify(newKittenDataObject)
+            );
             //Visualiza nuevamente el listado de gatitos
             renderKittenList(newKittenDataObject);
-    
+
             //Limpia los valores de cada input
             resetDataList();
             labelMesageError.innerHTML = 'Mola! Un nuevo gatito en Adalab!';
           } else {
-            labelMesageError.innerHTML = 'No se ha podido añadir un nuevo gatito';
+            labelMesageError.innerHTML =
+              'No se ha podido añadir un nuevo gatito';
           }
-         });
-  
-   
+        });
     }
   }
 }
@@ -208,9 +252,6 @@ function resetDataList() {
 
 //Mostrar el litado de gatitos en ell HTML
 getKittensFromApi();
-
-
-
 
 //Eventos
 linkNewFormElememt.addEventListener('click', handleClickNewCatForm);
